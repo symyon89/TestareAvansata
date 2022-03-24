@@ -1,11 +1,13 @@
-
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.AggregateWith;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.*;
 
-import java.io.IOException;
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.EnumSet;
-import java.util.Locale;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,4 +93,65 @@ public class ParametrizedTests {
         String actualValue =input.toUpperCase();
         assertEquals(actualValue,expected);
     }
+
+    @ParameterizedTest
+    @MethodSource("provideStringsForIsBlankMethod")
+    void methodSourceTest(String input, boolean expected) {
+        System.out.println("arguments from method :" + input + "<<<<");
+        assertEquals(expected, Checks.isBlank(input));
+    }
+
+    private static Stream<Arguments> provideStringsForIsBlankMethod(){
+        return Stream.of(
+                Arguments.of("not blank", false),
+                Arguments.of(" ", true),
+                Arguments.of("", true),
+                Arguments.of(null, true)
+        );
+    }
+    @ParameterizedTest
+    @MethodSource //daca testul are aceeasi denumirea nu mai trebuie sa declar metoda
+    void provideStringsForIsBlankMethod(String input, boolean expected) {
+        System.out.println("arguments from method :" + input + "<<<<");
+        assertEquals(expected, Checks.isBlank(input));
+    }
+
+    @ParameterizedTest
+    @MethodSource(value ="StringParams#blankStrings")
+    void methodFromAnotherClassSourceTest(String input) {
+        System.out.println("arguments from method  outside class:" + input + "<<<<");
+        assertTrue(Checks.isBlank(input));
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(BlankStringsArgumentsProviderImpl.class)
+    void isBlanckWithArgumenstProviderTest(String input) {
+        System.out.println("arguments from arguments provider:" + input + "<<<<");
+        assertTrue(Checks.isBlank(input));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"2022/03/24, 2022", "2022/01/01, 2022"})
+    public void csvSourceWithCustomWithConverter(@ConvertWith(DateConverterImpl.class) LocalDate input, int expected){
+        assertEquals(expected, input.getYear());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"Isac,,Newton,Isac Newton", "Charles,Robert,Darwin,Charles Robert Darwin"})
+    public void fullNameWithArgumentAccesorTest(ArgumentsAccessor argumentsAccessor){
+        String firstName = argumentsAccessor.getString(0);
+        String middleName = (String) argumentsAccessor.get(1);
+        String lastName = argumentsAccessor.getString(2);
+        String fullName = argumentsAccessor.getString(3);
+
+        Person person = new Person(firstName,middleName,lastName);
+        assertEquals(fullName, person.getFullName());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"Isac Newton,Isac,,Newton", "Charles Robert Darwin,Charles,Robert,Darwin"})
+    void getFullNameWithAgregatorTest(String expectedFullName,@AggregateWith(PersonAggregator.class) Person person) {
+        assertEquals(expectedFullName,person.getFullName());
+    }
+
 }

@@ -1,6 +1,5 @@
 import org.junit.jupiter.api.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -55,7 +54,7 @@ class CalculatorTest {
     }
 
     @Test
-    public void divideTest_ThowaExeptionWith0Value() {
+    void divideTest_ThowaExeptionWith0Value() {
         String expectedExceptionMessage = "division by 0";
         IllegalArgumentException actualExceptionThrown = assertThrows(IllegalArgumentException.class, () -> calculator.divide(10.0, 0.0));
 
@@ -63,7 +62,7 @@ class CalculatorTest {
     }
 
     @Test
-    public void divideTest_ThowaExeptionWith0Value_AssertJstyle() {
+    void divideTest_ThowaExeptionWith0Value_AssertJstyle() {
         assertThatThrownBy(()-> calculator.divide(10d,0d))
                 .hasMessage("division by 0")
                 .isExactlyInstanceOf(IllegalArgumentException.class);
@@ -79,7 +78,7 @@ class CalculatorTest {
         );
     }
 
-    @Test
+
     @RepeatedTest(3) //o sa ruleze testul de 3 ori
     @DisplayName("Documantatie test, adica acest test aduna 2 numere")
     void addRepeatedTest() {
